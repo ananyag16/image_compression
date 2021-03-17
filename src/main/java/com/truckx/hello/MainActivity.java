@@ -2,20 +2,22 @@ package com.truckx.hello;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 import android.widget.ImageView;
+import android.widget.Toast;
+
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.IOException;
+
+import static org.opencv.imgproc.Imgproc.INTER_AREA;
+import static org.opencv.imgproc.Imgproc.resize;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,22 +25,27 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        OpenCVLoader.initDebug();
     }
-    @SuppressLint("UseCompatLoadingForDrawables")
     public void displayToast(View v){
         Mat img = null;
 
-        img = Imgcodecs.imread(getResources().getDrawable(R.drawable.test).toString());
+        try {
+            img = Utils.loadResource(getApplicationContext(), R.drawable.test);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        Mat resizeimage = new Mat();
-        Size sz = new Size(640,320);
-        Imgproc.resize( img, resizeimage, sz );
+        Imgproc.cvtColor(img, img, Imgproc.COLOR_RGB2BGRA);
+        Mat img_result = new Mat();
+        Size scaleSize = new Size(100,200);
+        resize(img, img_result, scaleSize , 0, 0, INTER_AREA);
 
-        Mat img_result = resizeimage.clone();
-        Bitmap img_bitmap = Bitmap.createBitmap(img_result.cols(),img_result.rows(),Bitmap.Config.ARGB_8888);
+      //  Mat img_result = img.clone();
+      //  Imgproc.Canny(img, img_result, 80, 90);
+        Bitmap img_bitmap = Bitmap.createBitmap(img_result.cols(), img_result.rows(),Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(img_result, img_bitmap);
         ImageView imageView = findViewById(R.id.img);
         imageView.setImageBitmap(img_bitmap);
     }
-
 }
